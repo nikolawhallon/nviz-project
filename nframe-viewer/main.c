@@ -2,13 +2,12 @@
 // made by Nikola Whallon (https://github.com/nikolawhallon/nviz-project, nikola.whallon@gmail.com)
 
 #include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include <ncurses.h>
 
-#define MAX_COL 200
-#define MAX_ROW 100
-#define CH_BYTS	2
+#define NFRM_HD 2
+#define CH_BYTS 2
+#define MAX_COL 250
+#define MAX_ROW 75
 
 //----------------------------------------------------				// GLOBAL VARIABLES
 
@@ -23,8 +22,8 @@ int g_color_mode;				// bool
 // nframe
 char g_nframe_file_path[256];
 char g_frame[CH_BYTS * (MAX_COL * MAX_ROW)];
-uint32_t g_nframe_col;
-uint32_t g_nframe_row;
+int g_nframe_col;
+int g_nframe_row;
 
 // panels
 int g_hide_panel = 0;				// bool
@@ -99,7 +98,7 @@ void render_frame()
 			char chr;
 			char clr;
 
-			int32_t index = CH_BYTS * (r * g_nframe_col + c);
+			int index = CH_BYTS * (g_nframe_col * r + c);
 
 			clr = g_frame[index];
 			chr = g_frame[index + 1];
@@ -138,8 +137,6 @@ void render_frame()
 // initialize frame
 int init_frame()
 {
-	memset(g_frame, 48, CH_BYTS * (MAX_COL * MAX_ROW));
-
 	// declare and open the nframe file
 	FILE * nframe_file = fopen(g_nframe_file_path, "rb");
 
@@ -151,22 +148,22 @@ int init_frame()
 
 	// calculate the file size
 	fseek(nframe_file, 0, SEEK_END);
-	int32_t file_size = ftell(nframe_file);
+	int file_size = ftell(nframe_file);
 	fseek(nframe_file, 0, SEEK_SET);
 
 	// check that the file contains the nframe info
-	if (file_size < 4 * 2)
+	if (file_size < NFRM_HD)
 	{
 		fclose(nframe_file);
 		return 1;
 	}
 
 	// input the nframe info
-	fread(&g_nframe_col, 4, 1, nframe_file);
-	fread(&g_nframe_row, 4, 1, nframe_file);
+	fread(&g_nframe_col, 1, 1, nframe_file);
+	fread(&g_nframe_row, 1, 1, nframe_file);
 
 	// check that the file contains the nframe data
-	if (file_size < 4 * 2 + CH_BYTS * (g_nframe_col * g_nframe_row))
+	if (file_size < NFRM_HD + CH_BYTS * (g_nframe_col * g_nframe_row))
 	{
 		fclose(nframe_file);
 		return 1;
