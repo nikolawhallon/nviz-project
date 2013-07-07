@@ -91,9 +91,11 @@ void toggle_panel()
 // render frame
 void render_frame()
 {
-	for (int r = 0; r < g_nframe_row; r++)
+	int c;
+	int r;
+	for (r = 0; r < g_nframe_row; r++)
 	{
-		for (int c = 0; c < g_nframe_col; c++)
+		for (c = 0; c < g_nframe_col; c++)
 		{
 			char chr;
 			char clr;
@@ -119,7 +121,8 @@ void render_frame()
 
 	if (!g_hide_panel)
 	{
-		for (int i = 0; i < g_col; i++)
+		int i;
+		for (i = 0; i < g_col; i++)
 		{
 			mvaddch(g_row - 4, i, '-');
 		}

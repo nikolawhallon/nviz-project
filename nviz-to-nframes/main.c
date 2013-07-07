@@ -3,26 +3,26 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <string.h>
 
-#define MAX_COL 200
-#define MAX_ROW 100
+#define NVIZ_HD 5
 #define CH_BYTS 2
+#define MAX_COL 250
+#define MAX_ROW 75
 
 //----------------------------------------------------				// GLOBAL VARIABLES
 
 // nviz
 char g_nviz_file_path[256];
-int32_t g_nviz_col;
-int32_t g_nviz_row;
-int32_t g_nviz_fps;
-int32_t g_nviz_fno;
+int g_nviz_col;
+int g_nviz_row;
+int g_nviz_fps;
+int g_nviz_sec;
 
 // nframe
 char g_nframe_files_base_path[256];
-char g_frame[CH_BYTS * MAX_COL * MAX_ROW];
-int32_t g_nframe_col;
-int32_t g_nframe_row;
+char g_frame[CH_BYTS * (MAX_COL * MAX_ROW)];
+int g_nframe_col;
+int g_nframe_row;
 
 //----------------------------------------------------				// FUNCTIONS
 
@@ -43,20 +43,20 @@ int init_nviz()
 	fseek(nviz_file, 0, SEEK_SET);
 
 	// check that the file contains the nviz info
-	if (file_size < 4 * 4)
+	if (file_size < NVIZ_HD)
 	{
 		fclose(nviz_file);
 		return 1;
 	}
 
 	// input the nviz info
-	fread(&g_nviz_col, 4, 1, nviz_file);
-	fread(&g_nviz_row, 4, 1, nviz_file);
-	fread(&g_nviz_fps, 4, 1, nviz_file);
-	fread(&g_nviz_fno, 4, 1, nviz_file);
+	fread(&g_nviz_col, 1, 1, nviz_file);
+	fread(&g_nviz_row, 1, 1, nviz_file);
+	fread(&g_nviz_fps, 1, 1, nviz_file);
+	fread(&g_nviz_sec, 1, 1, nviz_file);
 
 	// check that the file contains the nviz data
-	if (file_size < 4 * 4 + CH_BYTS * (g_nviz_col * g_nviz_row) * g_nviz_fno)
+	if (file_size < NVIZ_HD + CH_BYTS * (g_nviz_col * g_nviz_row) * g_nviz_fps * g_nviz_sec)
 	{
 		fclose(nviz_file);
 		return 1;
@@ -85,11 +85,12 @@ int main(int argc, char * argv[])
 		return 1;
 	}
 
-	for (int f = 0; f < g_nviz_fno; f++)
+	int32_t f;
+	for (f = 0; f < g_nviz_fps * g_nviz_sec; f++)
 	{
 		FILE * nviz_file = fopen(g_nviz_file_path, "rb");
 
-		fseek(nviz_file, 4 * 4 + CH_BYTS * (f * g_nviz_col * g_nviz_row), SEEK_SET);
+		fseek(nviz_file, NVIZ_HD + CH_BYTS * (g_nviz_col * g_nviz_row) * f, SEEK_SET);
 		fread(g_frame, 1, CH_BYTS * (g_nviz_col * g_nviz_row), nviz_file);
 
 		fclose(nviz_file);
@@ -99,8 +100,8 @@ int main(int argc, char * argv[])
 
 		FILE * nframe_file = fopen(nframe_file_path, "wb");
 
-		fwrite(&g_nviz_col, 4, 1, nframe_file);
-		fwrite(&g_nviz_row, 4, 1, nframe_file);
+		fwrite(&g_nviz_col, 1, 1, nframe_file);
+		fwrite(&g_nviz_row, 1, 1, nframe_file);
 		fwrite(&g_frame, 1, CH_BYTS * (g_nviz_col * g_nviz_row), nframe_file);
 
 		fclose(nframe_file);
