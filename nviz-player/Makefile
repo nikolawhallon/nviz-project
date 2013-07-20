@@ -1,7 +1,7 @@
 SRC := $(wildcard *.c)
 OBJ := $(SRC:.c=.o)
 CFLAGS := -O3
-LDFLAGS := -lncurses -lpthread -lrt
+LDFLAGS := -lncurses -lpthread
 
 %.o:%.c
 	gcc -c -o $@ $< $(CFLAGS)

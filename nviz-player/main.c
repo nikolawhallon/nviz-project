@@ -62,8 +62,8 @@ int g_hide_panel = 0;
 int g_info_control_panel = 0;
 
 // semaphore
-sem_t g_switch_sem;
-sem_t g_read_sem;
+sem_t * g_switch_sem;
+sem_t * g_read_sem;
 
 // thread
 pthread_attr_t g_read_thread_attr;
@@ -148,7 +148,7 @@ void set_info_control_panel(int info_or_control)
 // switch frame pools
 void switch_frame_pools(int32_t _read_frame_index)
 {
-	sem_wait(&g_switch_sem);
+	sem_wait(g_switch_sem);
 
 	g_frame_pool_rendering ^= 1;
 	g_frame_pool_reading ^= 1;
@@ -164,7 +164,7 @@ void switch_frame_pools(int32_t _read_frame_index)
 
 	g_thread_info.t_read_frame_index = _read_frame_index;
 
-	sem_post(&g_read_sem);
+	sem_post(g_read_sem);
 }
 
 // read frames thread
@@ -255,8 +255,8 @@ int init_nviz()
 	fclose(nviz_file);
 
 	// semaphore
-	sem_init(&g_switch_sem, 0, 1);
-	sem_init(&g_read_sem, 0, 0);
+	sem_init(g_switch_sem, 0, 1);
+	sem_init(g_read_sem, 0, 0);
 
 	// thread
 	g_thread_info.t_running = 1;
@@ -266,8 +266,8 @@ int init_nviz()
 	g_thread_info.t_nviz_row = g_nviz_row;
 	g_thread_info.t_nviz_fps = g_nviz_fps;
 	g_thread_info.t_nviz_sec = g_nviz_sec;
-	g_thread_info.t_switch_sem = &g_switch_sem;
-	g_thread_info.t_read_sem = &g_read_sem;
+	g_thread_info.t_switch_sem = g_switch_sem;
+	g_thread_info.t_read_sem = g_read_sem;
 	g_thread_info.t_read_frame_index = 0;
 
 	pthread_attr_init(&g_read_thread_attr);
@@ -284,7 +284,7 @@ int init_nviz()
 void deinit_nviz()
 {
 	g_thread_info.t_running = 0;
-	sem_post(&g_read_sem);
+	sem_post(g_read_sem);
 	pthread_join(g_read_thread_id, NULL);
 }
 
