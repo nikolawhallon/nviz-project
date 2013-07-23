@@ -7,6 +7,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <signal.h>
+//#include <fcntl.h>
 
 #define NVIZ_HD 5
 #define CH_BYTS	2
@@ -255,8 +256,8 @@ int init_nviz()
 	fclose(nviz_file);
 
 	// semaphore
-	sem_init(g_switch_sem, 0, 1);
-	sem_init(g_read_sem, 0, 0);
+	g_switch_sem = sem_open("/switchsem", O_CREAT, S_IRUSR | S_IWUSR, 1);
+	g_read_sem = sem_open("/readsem", O_CREAT, S_IRUSR | S_IWUSR, 0);
 
 	// thread
 	g_thread_info.t_running = 1;
@@ -286,6 +287,12 @@ void deinit_nviz()
 	g_thread_info.t_running = 0;
 	sem_post(g_read_sem);
 	pthread_join(g_read_thread_id, NULL);
+
+	sem_close(g_switch_sem);
+	sem_unlink("/switchsem");
+
+	sem_close(g_read_sem);
+	sem_unlink("/readsem");
 }
 
 // start/stop
