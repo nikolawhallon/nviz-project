@@ -7,7 +7,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <signal.h>
-//#include <fcntl.h>
+#include <fcntl.h>
 
 #define NVIZ_HD 5
 #define CH_BYTS	2
@@ -375,7 +375,7 @@ void fast_forward_nviz()
 	}
 }
 
-// render video
+// render
 void render()
 {
 	int c;
