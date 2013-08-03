@@ -53,7 +53,7 @@ int init_nviz()
 	fread(&g_nviz_col, 1, 1, nviz_file);
 	fread(&g_nviz_row, 1, 1, nviz_file);
 	fread(&g_nviz_fps, 1, 1, nviz_file);
-	fread(&g_nviz_sec, 1, 1, nviz_file);
+	fread(&g_nviz_sec, 2, 1, nviz_file);
 
 	// check that the file contains the nviz data
 	if (file_size < NVIZ_HD + CH_BYTS * (g_nviz_col * g_nviz_row) * g_nviz_fps * g_nviz_sec)
