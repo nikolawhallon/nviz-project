@@ -34,9 +34,9 @@ int main(int argc, char * argv[])
 	sprintf(nviz_file_path, argv[2]);
 
 	// input columns, rows, frames_per_second, and color
-	int32_t col = atoi(argv[3]);
-	int32_t row = atoi(argv[4]);
-	int32_t fps = atoi(argv[5]);
+	uint8_t col = atoi(argv[3]);
+	uint8_t row = atoi(argv[4]);
+	uint8_t fps = atoi(argv[5]);
 	char color = atoi(argv[6]);
 
 	// declare and open the wav_file
@@ -164,7 +164,7 @@ int main(int argc, char * argv[])
 			fread(&Subchunk2Size, 4, 1, wav_file);
 			break;
 		}
-		else
+		else if (optional_chunk_id != 0x00000000)
 		{
 			fread(&optional_chunk_size, 4, 1, wav_file);
 
@@ -222,7 +222,7 @@ int main(int argc, char * argv[])
 	// col										// supplied by user, declared/defined above
 	// row										// supplied by user, declared/defined above
 	// fps										// supplied by user, declared/defined above
-	int32_t sec = ((Subchunk2Size / (BitsPerSample / 8)) / 2) / SampleRate;		// integer number of seconds
+	int16_t sec = ((Subchunk2Size / (BitsPerSample / 8)) / 2) / SampleRate;		// integer number of seconds
 	int32_t fno = fps * sec;							// maximum number of frames that fps goes evenly into
 	int32_t frame_count = 0;							// used to truncate remaining frames
 
@@ -234,10 +234,10 @@ int main(int argc, char * argv[])
 	FILE * nviz_file = fopen(nviz_file_path, "wb");
 
 	// write out the video info
-	fwrite(&col, 4, 1, nviz_file);
-	fwrite(&row, 4, 1, nviz_file);
-	fwrite(&fps, 4, 1, nviz_file);
-	fwrite(&fno, 4, 1, nviz_file);
+	fwrite(&col, 1, 1, nviz_file);
+	fwrite(&row, 1, 1, nviz_file);
+	fwrite(&fps, 1, 1, nviz_file);
+	fwrite(&sec, 2, 1, nviz_file);
 
 	// let user know data conversion has begun
 	printf("converting audio data...\n");
@@ -251,14 +251,14 @@ int main(int argc, char * argv[])
 		fread(&r, 2, 1, wav_file);
 
 		// adjust for two's compliment
-		if (l > 32767)
+		if ((uint16_t) l > 32767)
 		{
-			l -= 65536;
+			l = (uint16_t) l - 65536;
 		}
 
-		if (r > 32767)
+		if ((uint16_t) r > 32767)
 		{
-			r -= 65536;
+			r = (uint16_t) r - 65536;
 		}
 
 		// write out the waveform
