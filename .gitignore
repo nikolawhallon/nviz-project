@@ -1,0 +1,6 @@
+*.o
+nframe-to-bmp/nframe-to-bmp
+nframe-viewer/nframe-viewer
+nviz-player/nviz-player
+nviz-to-nframes/nviz-to-nframes
+wav-to-nviz/wav-to-nviz
